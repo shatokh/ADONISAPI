@@ -8,25 +8,24 @@
 */
 
 import router from '@adonisjs/core/services/router'
+import { middleware } from '#start/kernel'
 
-// Здоровотест
+const AuthController = () => import('#controllers/auth_controller')
+const UserStatusController = () => import('#controllers/user_status_controller')
+
 router.get('/', async () => {
   return { hello: 'world' }
 })
 
-// Группа маршрутов для аутентификации
 router
   .group(() => {
-    // Регистрация (для гостей)
-    router.post('/register', 'AuthController.register').use(['guest'])
+    router.post('/register', [AuthController, 'register']).use(middleware.guest())
+    router.post('/login', [AuthController, 'login']).use(middleware.guest())
+    router.get('/me', [AuthController, 'me']).use(middleware.auth())
 
-    // Логин (для гостей)
-    router.post('/login', 'AuthController.login').use(['guest'])
-
-    // Получить профиль (для аутентифицированных)
-    router.get('/me', 'AuthController.me').use(['auth'])
-
-    // Изменить статус пользователя (только для админа)
-    router.patch('/users/:id/status', 'UserStatusController.update').use(['auth']).use(['isAdmin'])
+    router
+      .patch('/users/:id/status', [UserStatusController, 'update'])
+      .use(middleware.auth())
+      .use(middleware.isAdmin())
   })
   .prefix('/auth')

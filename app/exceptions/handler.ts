@@ -1,20 +1,10 @@
-import Logger from '@ioc:Adonis/Core/Logger'
-import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import { Exception } from '@poppinss/utils'
+import app from '@adonisjs/core/services/app'
+import { HttpContext, ExceptionHandler } from '@adonisjs/core/http'
 
-export default class ExceptionHandler {
-  public async handle(error: Exception, { response }: HttpContextContract) {
-    // Если это наша ошибка (4xx), отдаём её как есть
-    if (error.status && error.status < 500) {
-      return response.status(error.status).send({ message: error.message })
-    }
+export default class HttpExceptionHandler extends ExceptionHandler {
+  protected debug = !app.inProduction
 
-    // Логируем внутреннюю ошибку
-    Logger.error(error.stack || error.message)
-
-    // Все прочие (500+) конвертим в 400 Bad Request
-    return response.status(400).send({
-      message: 'Не удалось обработать запрос, проверьте ввод и повторите.',
-    })
+  async handle(error: unknown, ctx: HttpContext) {
+    return super.handle(error, ctx)
   }
 }
