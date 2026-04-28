@@ -37,10 +37,7 @@ router.use([
  * Named middleware for assigning to routes or route groups.
  */
 export const middleware = router.named({
-  // Built-in
   auth: () => import('#middleware/auth_middleware'),
   guest: () => import('#middleware/allow_guest_middleware'),
-
-  // Custom admin check
-  isAdmin: () => import('App/Middleware/IsAdmin'),
+  isAdmin: () => import('#middleware/is_admin'),
 })
